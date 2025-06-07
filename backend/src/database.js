@@ -1,11 +1,28 @@
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 
-const db = new sqlite3.Database('./database.db', (err) => {
-    if (err) {
-        console.error(err.message);
-    }
-    console.log('Connected to the SQLite database.');
-    db.run('CREATE TABLE IF NOT EXISTS files (id INTEGER PRIMARY KEY AUTOINCREMENT, originalname TEXT, filename TEXT, mimetype TEXT, size INTEGER)');
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL || 'postgres://user:password@localhost:5432/filedb',
+    user: process.env.POSTGRES_USER || 'user',
+    password: process.env.POSTGRES_PASSWORD || 'password',
+    database: process.env.POSTGRES_DB || 'filedb',
+    port: process.env.POSTGRES_PORT || 5432,
+    host: process.env.POSTGRES_HOST || 'localhost',
 });
 
-module.exports = db; 
+pool.on('connect', () => {
+    console.log('Connected to the PostgreSQL database.');
+    const query = `
+        CREATE TABLE IF NOT EXISTS files (
+            id SERIAL PRIMARY KEY,
+            originalname TEXT,
+            filename TEXT,
+            mimetype TEXT,
+            size INTEGER
+        );
+    `;
+    pool.query(query).catch(err => console.error('Error creating table:', err.stack));
+});
+
+module.exports = {
+    query: (text, params) => pool.query(text, params),
+}; 

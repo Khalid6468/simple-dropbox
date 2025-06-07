@@ -48,27 +48,30 @@ const upload = multer({
 });
 
 // API to upload a file
-router.post('/upload', upload.single('file'), (req, res) => {
+router.post('/upload', upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).send({ message: 'Upload failed. Please check file type or file size (max 5MB).' });
     }
     const { originalname, filename, mimetype, size } = req.file;
-    db.run(`INSERT INTO files(originalname, filename, mimetype, size) VALUES(?, ?, ?, ?)`, [originalname, filename, mimetype, size], function(err) {
-        if (err) {
-            return res.status(500).send(err.message);
-        }
-        res.status(200).send({ message: 'File uploaded successfully', fileId: this.lastID });
-    });
+    try {
+        const result = await db.query(
+            'INSERT INTO files(originalname, filename, mimetype, size) VALUES($1, $2, $3, $4) RETURNING id',
+            [originalname, filename, mimetype, size]
+        );
+        res.status(200).send({ message: 'File uploaded successfully', fileId: result.rows[0].id });
+    } catch (err) {
+        return res.status(500).send(err.message);
+    }
 });
 
 // API to get all files
-router.get('/files', (req, res) => {
-    db.all('SELECT * FROM files', [], (err, rows) => {
-        if (err) {
-            return res.status(500).send(err.message);
-        }
+router.get('/files', async (req, res) => {
+    try {
+        const { rows } = await db.query('SELECT * FROM files');
         res.status(200).json(rows);
-    });
+    } catch (err) {
+        return res.status(500).send(err.message);
+    }
 });
 
 // API to download a file
@@ -79,20 +82,20 @@ router.get('/download/:filename', (req, res) => {
 });
 
 // API to view a file
-router.get('/view/:filename', (req, res) => {
+router.get('/view/:filename', async (req, res) => {
     const { filename } = req.params;
-    db.get(`SELECT mimetype FROM files WHERE filename = ?`, [filename], (err, row) => {
-        if (err) {
-            return res.status(500).send(err.message);
-        }
-        if (row) {
+    try {
+        const { rows } = await db.query('SELECT mimetype FROM files WHERE filename = $1', [filename]);
+        if (rows.length > 0) {
             const file = path.join(__dirname, '../../uploads', filename);
-            res.setHeader('Content-Type', row.mimetype);
+            res.setHeader('Content-Type', rows[0].mimetype);
             res.sendFile(file);
         } else {
             res.status(404).send('File not found');
         }
-    });
+    } catch (err) {
+        return res.status(500).send(err.message);
+    }
 });
 
 module.exports = router; 

@@ -11,7 +11,7 @@ This project is a simplified, Dropbox-like file management application that allo
 
 ## Technologies Used
 
-- **Backend**: Node.js, Express, Multer, SQLite
+- **Backend**: Node.js, Express, Multer, Postgres
 - **Frontend**: React, Vite, Axios, Nginx
 - **Containerization**: Docker, Docker Compose
 
@@ -44,7 +44,7 @@ This project is a simplified, Dropbox-like file management application that allo
 │   │   ├── routes
 │   │   │   └── files.js      # API routes for files
 │   │   ├── app.js            # Express app setup
-│   │   └── database.js       # SQLite database setup
+│   │   └── database.js       # Postgres database setup
 │   ├── Dockerfile            # Docker configuration for the backend
 │   ├── index.js              # Server entry point
 │   ├── package.json

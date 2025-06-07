@@ -1,13 +1,29 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:13
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: filedb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   backend:
     build: ./backend
     ports:
       - "3002:3001"
     volumes:
       - ./backend/uploads:/usr/src/app/uploads
-      - ./backend/database.db:/usr/src/app/database.db
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://user:password@db:5432/filedb
 
   frontend:
     build: ./frontend
@@ -15,3 +31,6 @@ services:
       - "80:80"
     depends_on:
       - backend 
+
+volumes:
+  postgres_data: 
