@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
 
+// Create a lazily-initialised PostgreSQL connection pool (pg)
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL || 'postgres://user:password@localhost:5432/filedb',
     user: process.env.POSTGRES_USER || 'user',
@@ -9,6 +10,7 @@ const pool = new Pool({
     host: process.env.POSTGRES_HOST || 'localhost',
 });
 
+// Create the files table if it doesn't exist
 pool.on('connect', () => {
     console.log('Connected to the PostgreSQL database.');
     const query = `

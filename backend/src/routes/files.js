@@ -5,6 +5,7 @@ const db = require('../database');
 
 const router = express.Router();
 
+// List of allowed MIME types for file uploads
 const allowedMimeTypes = [
     'image/jpeg', 'image/png',
     'text/plain',
