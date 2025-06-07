@@ -77,3 +77,32 @@
 .file-list a {
   margin: 0 10px;
 }
+
+.drop-zone {
+  border: 2px dashed #ccc;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  min-height: 200px;
+  padding: 2rem;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.drop-zone.drag-over {
+  border-color: #646cff;
+}
+
+.drop-zone p {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.file-input {
+  display: none;
+}

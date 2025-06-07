@@ -7,6 +7,7 @@ const API_URL = '/api';
 function App() {
     const [files, setFiles] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
 
     useEffect(() => {
@@ -23,7 +24,10 @@ function App() {
     };
 
     const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
+        const file = event.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+        }
     };
 
     const handleUpload = async () => {
@@ -57,15 +61,55 @@ function App() {
         }
     };
 
+    const handleDrop = (event) => {
+        event.preventDefault();
+        setIsDragging(false);
+        const file = event.dataTransfer.files[0];
+        if (file) {
+            setSelectedFile(file);
+        }
+    };
+
+    const handleDragOver = (event) => {
+        event.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (event) => {
+        event.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleBrowseClick = () => {
+        fileInputRef.current.click();
+    };
+
     return (
         <div className="App">
             <header className="App-header">
                 <h1>Simple Dropbox</h1>
             </header>
-            <div className="upload-section">
-                <input type="file" onChange={handleFileChange} ref={fileInputRef} accept=".jpg,.jpeg,.png,.txt,.json,.pdf,.csv,.doc,.docx,.xls,.xlsx,.log,.mp3,.wav,.mp4,.mpeg,.mov,.zip" />
-                <button onClick={handleUpload}>Upload</button>
+            <div 
+                className={`drop-zone ${isDragging ? 'drag-over' : ''}`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={handleBrowseClick}
+            >
+                <input 
+                    type="file" 
+                    onChange={handleFileChange} 
+                    ref={fileInputRef} 
+                    className="file-input"
+                    accept=".jpg,.jpeg,.png,.txt,.json,.pdf,.csv,.doc,.docx,.xls,.xlsx,.log,.mp3,.wav,.mp4,.mpeg,.mov,.zip" 
+                />
+                {selectedFile ? (
+                    <p>Selected file: {selectedFile.name}</p>
+                ) : (
+                    <p>Drag and drop a file here, or click to browse.</p>
+                )}
             </div>
+            {selectedFile && <button onClick={handleUpload}>Upload</button>}
             <div className="file-list">
                 <h2>Uploaded Files</h2>
                 <ul>
